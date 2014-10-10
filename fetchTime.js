@@ -1,11 +1,20 @@
 var SimpleDate = require('./SimpleDate')
 	// 时间单位词
 	var timeUnits = '年月日时分秒天号天';
+	// 时间段单位
+	var timeBUnits = '(年|月|个月|天|日|小时|分钟|秒|)'
 	// 数量词
 	var numbers = '一二三四五六七八九十百零两1234567890';
+	// 周量词
+	var weekNumber = '[一二三四五六日]'
+	// 时间数量词
+	var yearNumbers = '(['+numbers+']{2}'+'|'+'['+numbers+']{4})';
+	// 其他时间量词
+	var otherNumbers = '(['+numbers+']{1,3})';
+	// console.log(new RegExp(otherNumbers).exec("三月去打球"))
 	// 时间定位词
 	// 定位当前	这周 这个月 本周 今天
-	var locateThis = '(|这|本|今|这个)'
+	var locateThis = '(这|本|今|这个)'
 	// 定位之前 上周 上一周 上个月 上一个月 去年 昨天
 	var locatePre = "(上|昨|去)"
 	// 定位之前两 前天 前年
@@ -13,9 +22,11 @@ var SimpleDate = require('./SimpleDate')
 	// 定位之后 明天 下周 下个月 明年
 	var locateNext = '(明|下|下个)';
 	// 定位之后两 后天 后年 
-	var locateNextNext = '(后)' 
+	var locateNextNext = '(后)'
+	// 所有定位词
+	var locate = '('+locateThis+'|'+locatePre+'|'+locatePrePre+'|'+locateNext+'|'+locateNextNext+')';
 	// 时间位移词
-	var offset = '后前';
+	var offset = '(后|前)';
 // var fetchTime = function(nl){
 
 // 	// 表示时间描述的结尾
@@ -28,19 +39,26 @@ var SimpleDate = require('./SimpleDate')
 
 var fetchTime = function(nl){
 	var patts = [];
-	// 匹配"2001年2月二日三点十五分四秒"
-	patts.push(new RegExp('(['+numbers+']{2,4}年)?(['+numbers+']{1,2}月)?(['+numbers+']{1,2}[日号])?(['+numbers+']{1,2}[时点])?(['+numbers+']{1,2}分?)?(['+numbers+']{1,2}秒)?'));
-	// 匹配"一年后"，"两小时前"这样的格式
-	patts.push(new RegExp('['+numbers+']{1,5}(['+timeUnits+']|小时|分钟|个月)[后前]'));
-	// 匹配"下周一。。。"这样的格式
-	patts.push(new RegExp('['+location+']?周['+numbers+']'+'(['+numbers+']{1,2}[时点])?(['+numbers+']{1,2}分?)?(['+numbers+']{1,2}秒)?'));
-	// 匹配“今天明天后天大后天。。。”这样的格式
-	patts.push(new RegExp('今天'+'(['+numbers+']{1,2}[时点])?(['+numbers+']{1,2}分?)?(['+numbers+']{1,2}秒)?'));
+	// 0.匹配"2001年2月二日三点十五分四秒"
+	patts.push(new RegExp('(('+yearNumbers+'|'+locate+')年)?(('+otherNumbers+'|'+locate+')月)?(('+otherNumbers+'|'+locate+')[日号天])?(('+otherNumbers+')[时点])?(('+otherNumbers+')分)?(('+otherNumbers+')秒)?'));
+	// 1.同上但是支持省略分单位 例如：三点四十
+	patts.push(new RegExp('(('+yearNumbers+'|'+locate+')年)?(('+otherNumbers+'|'+locate+')月)?(('+otherNumbers+'|'+locate+')[日号天])?('+otherNumbers+')[时点]('+otherNumbers+')'));
+	// 2,匹配一段之间以后”三天后“，一年零七个月后
+	patts.push(new RegExp('('+otherNumbers+')('+timeBUnits+')('+otherNumbers+')('+timeBUnits+')('+offset+')'));
+	// 3,含有周的格式 周一周二 几点几分
+	patts.push(new RegExp('('+locate+')?周('+weekNumber+')(('+otherNumbers+')[时点])?(('+otherNumbers+')分)?(('+otherNumbers+')秒)?'));
+	// 4,含有周的格式 周一周二 几点几
+	patts.push(new RegExp('('+locate+')?周('+weekNumber+')'+'('+otherNumbers+')[时点]('+otherNumbers+')'));
 
-	var result;
+	var result = '';
 	for(index in patts){
-		if (nl.match(patts[index]))
-			result =  nl.match(patts[index])[0];
+		if (nl.match(patts[index])){
+			r =  nl.match(patts[index])[0];
+			if(r>result){
+				console.log(index);
+				result = r;
+			}
+		}
 	}
 	return result;
 }
@@ -165,10 +183,25 @@ var languageToDate1 = function(nlt){
 	return date;
 }
 
-// console.log(fetchTime("一天后打羽毛球"));
+// console.log(fetchTime("11年三月打羽毛球"));
+// console.log(fetchTime("2012年三月打羽毛球"));
+// console.log(fetchTime("今年三月打羽毛球"));
+// console.log(fetchTime("明年十月十五日三点四十打羽毛球"));
+// console.log(fetchTime("今天三点五十六分四秒"));
+// console.log(fetchTime("明天三点二十五打羽毛球"));
+// console.log(fetchTime("五天后打球"));
+// console.log(fetchTime("七日后打羽毛球"));
+// console.log(fetchTime("一年零七个月后打羽毛球"));
+// console.log(fetchTime("周一打球"));
+// console.log(fetchTime("周一四点五十二分打球"));
+// console.log(fetchTime("周六五点四十打飞机"));
+// console.log(fetchTime("我要在本周六五点四十打飞机"));
+
+
 // console.log(fetchTime("四小时后写作业"));
 // console.log(fetchTime("一分钟前打酱油"));
 // console.log(fetchTime("五月一日去看海"));
+// console.log(fetchTime("四点去看海"));
 // console.log(fetchTime("周一打酱油"));
 // console.log(fetchTime("本周一打酱油"));
 // console.log(fetchTime("我在上周一打酱油"));
@@ -191,7 +224,7 @@ var languageToDate1 = function(nlt){
 // var d = languageToDate1("二零一一年五月十五日三点十五分");
 // var d = languageToDate1("五点二十二");
 
-var d = languageToDate1("五点半");
-var s = d.toSimpleString();
-console.log(s);
+// var d = languageToDate1("五点半");
+// var s = d.toSimpleString();
+// console.log(s);
 
