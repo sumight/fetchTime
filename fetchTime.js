@@ -1,4 +1,4 @@
-var SimpleDate = require('./SimpleDate')
+var SimpleDate = require('SimpleDate')
 	// 时间单位词
 	var timeUnits = '年月日时分秒天号';
 	// 时间段单位

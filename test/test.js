@@ -1,4 +1,4 @@
-var fetchTime = require("./fetchTime");
+var fetchTime = require("../fetchTime");
 var assert = require("assert");
 
 var testcases = {
