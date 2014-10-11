@@ -29,12 +29,17 @@ var SimpleDate = function(){
 	this.getDate = function(){return this.date.getDate()}
 	this.setDate = function(date){return this.date.setDate(date)}
 	this.getDay = function(){return this.date.getDay()}
+	// 设置为本周的周几
+	this.setDay = function(day){
+		var daynow = this.getDay();
+		this.setTime(this.getTime()+day*this.lDay -daynow*this.lDay);
+	}
 	this.getHour = function(){return this.date.getHours()}
 	this.setHour = function(hour){return this.date.setHours(hour)}
 	this.getMinute = function(){return this.date.getMinutes()}
 	this.setMinute = function(minute){return this.date.setMinutes(minute)}
 	this.getSecond = function(){return this.date.getSeconds()}
-	this.setSecond = function(second){return this.date.setSeconds(minute)}
+	this.setSecond = function(second){return this.date.setSeconds(second)}
 	this.setAsNextYear = function(){this.date.setFullYear(this.date.getFullYear()+1);}
 	this.setAsPreYear = function(){this.date.setFullYear(this.date.getFullYear()-1);}
 	this.setAsNextMonth = function(){
@@ -68,6 +73,6 @@ var SimpleDate = function(){
 		this.date.setTime(this.date.getTime()-this.lDay);
 	}
 	this.toString = function(){return ("year:"+this.getYear()+",month:"+this.getMonth()+",date:"+this.getDate())}
-	this.toSimpleString = function(){return (+this.getYear()+"-"+this.getMonth()+"-"+this.getDate()+"-"+this.getHour()+"-"+this.getMinute()+"-"+this.getSecond())}
+	this.toSimpleString = function(){return (+this.getYear()+"-"+this.getMonth()+"-"+this.getDate()+" "+this.getHour()+":"+this.getMinute()+":"+this.getSecond())}
 }
 module.exports = SimpleDate;
